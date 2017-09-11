@@ -91,3 +91,43 @@ int main(void) {
   /* code */
   return 0;
 }
+
+void printMenu(){
+
+}
+
+void addDriver(){
+
+}
+
+void deleteDriver(){
+
+}
+
+void deleteList(){
+
+}
+
+void printList(){
+
+}
+
+void searchList(){
+
+}
+
+void encryptList(){
+
+}
+
+void compressList(){
+
+}
+
+void decryptList(){
+
+}
+
+void decompressList(){
+
+}
