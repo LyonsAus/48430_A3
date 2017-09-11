@@ -110,6 +110,9 @@ void deleteList(){
 
 void printList(){
 
+
+ exit(0);
+ 
 }
 
 void searchList(){
