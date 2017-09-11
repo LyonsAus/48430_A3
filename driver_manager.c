@@ -93,6 +93,7 @@ int main(void) {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 /** THIS IS THE END OF THE PROGRAM **/
 
 =======
@@ -139,3 +140,7 @@ void decompressList(){
 
 }
 >>>>>>> Alex
+=======
+/** THIS IS THE END OF THE PROGRAM **/
+
+>>>>>>> Omar
