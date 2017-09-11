@@ -92,6 +92,10 @@ int main(void) {
   return 0;
 }
 
+<<<<<<< HEAD
+/** THIS IS THE END OF THE PROGRAM **/
+
+=======
 void printMenu(){
 
 }
@@ -134,3 +138,4 @@ void decryptList(){
 void decompressList(){
 
 }
+>>>>>>> Alex
