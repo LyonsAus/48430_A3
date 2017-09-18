@@ -153,7 +153,61 @@ void printMenu(int mode){
 }
 /* Hasan */
 void addDriver(){
+  /* From A2 - sList variable is a counter of the number of students in the array
+  if(sList == MAX_CLASS_SIZE){
+		printf("Class is full\n");
+	}
+	else{
+		char newName;
+		int newDay = -1;
+		int newMonth = -1;
+		int newYear = -1;
+		float newGPA = -1.0f;
 
+		printf("Enter name>");
+		scanf("%s", &newName);
+		strcpy(studentlist[sList].name, &newName);
+
+
+		while(newDay <= 0 || newDay > 31){
+			printf("Enter birthday: day>");
+			scanf("%d", &newDay);
+				if(newDay <= 0 || newDay > 31){
+				printf("Invalid day. ");
+				}
+			}
+			studentlist[sList].bday.day = newDay;
+
+		while(newMonth <= 0 || newMonth > 12){
+			printf("Enter birthday: month>");
+			scanf("%d", &newMonth);
+				if(newMonth <= 0 || newMonth > 12){
+				printf("Invalid month. ");
+				}
+			}
+			studentlist[sList].bday.month = newMonth;
+
+		while(newYear < 1800 || newYear > 2017){
+			printf("Enter birthday: year>");
+			scanf("%d", &newYear);
+				if(newYear < 1800 || newYear > 2017){
+					printf("Invalid year. ");
+				}
+			}
+			studentlist[sList].bday.year = newYear;
+
+		while(newGPA < 0 || newGPA > 4){
+			printf("Enter GPA>");
+			scanf("%f", &newGPA);
+				if(newGPA < 0 || newGPA > 4){
+					printf("Invalid gpa. ");
+				}
+			}
+			studentlist[sList].GPA = newGPA;
+
+			sList++;
+		}
+  */
 }
 /* Alex/Hasan */
 void deleteDriver(){
