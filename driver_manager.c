@@ -1,16 +1,12 @@
 /*
-
-test comment for github desktop
-
-*/
-
-/*
 Group 10:
 Alex Lyons 99126827
 Godwin Huang 12458004
 Hasan Rahman 12457988
 Minh Van 11104332
 Omar Salam 12002376
+
+Driver Management System
 */
 
 #include <stdio.h>
@@ -22,9 +18,6 @@ Omar Salam 12002376
 Definiteions for limiting array sizes
 */
 
-
-/**** TEST COMMMENT ****/
-
 #define MAX_NUM_DRIVERS 50
 #define MAX_NAME_SIZE 11
 
@@ -32,7 +25,7 @@ Definiteions for limiting array sizes
 driver struct:
 
 Address -
-post code is limited to 1000-2999 for NSW codes
+post code is limited to 2000-2999 for NSW codes
 */
 
 struct driver{
@@ -92,42 +85,67 @@ int main(void) {
   return 0;
 }
 
-void printMenu(){
+  /*
+  Function work allocation is prelimiary/in draft; this will be iterated once
+  the amount of work required for each funciton is more clear.
+  */
 
+void printMenu(){
+  /*
+  Alex Lyons
+  */
 }
 
 void addDriver(){
-
+  /*
+  Alex Lyons
+  */
 }
 
 void deleteDriver(){
-
+  /*
+  Alex Lyons
+  */
 }
 
 void deleteList(){
-
+  /*
+  Alex Lyons
+  */
 }
 
 void printList(){
-
+  /*
+  Alex Lyons
+  */
 }
 
 void searchList(){
-
+  /*
+  Alex Lyons
+  */
 }
 
 void encryptList(){
-
+  /*
+  Omar Salam
+  */
 }
 
 void compressList(){
-
+  /*
+  Minh Van
+  */
 }
 
 void decryptList(){
-
+  /*
+  Hasan Rahman
+  */
 }
 
 void decompressList(){
-
+  /*
+  Godwin Huang
+  */
 }
