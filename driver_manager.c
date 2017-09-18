@@ -135,7 +135,9 @@ int main(void) {
   return 1;
 }
 
-void printMenu(){
+
+/* Omar */
+void printMenu(int mode){
   printf("\n\n"
     "1. Add Driver\n"
     "2. Delete Last Driver\n"
@@ -149,39 +151,39 @@ void printMenu(){
     "10. Exit\n"
     "Enter Your Choice> ");
 }
-
+/* Hasan */
 void addDriver(){
 
 }
-
+/* Alex/Hasan */
 void deleteDriver(){
 
 }
-
+/* Alex/Hasan */
 void deleteList(){
 
 }
-
+/* Hasan */
 void printList(){
 
 }
-
+/* Alex/Hasan */
 void searchList(){
 
 }
-
+/* Hasan */
 void encryptList(){
 
 }
-
+/* Godwin/Minh */
 void compressList(){
 
 }
-
+/* Hasan */
 void decryptList(){
 
 }
-
+/* Godwin/Minh */
 void decompressList(){
 
 }
