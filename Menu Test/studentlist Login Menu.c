@@ -54,26 +54,31 @@ struct student {
 };
 
 void printAdminMenu(void);
+void printUserMenu(void);
+void printMainMenu(void);
+
 
 int IsDayValid(int storDay);
 int IsMonthValid(int storMonth);
 int IsYearValid(int storYear);
-int sign_In(char user[30], char pass[30]);
+int adminsign_In(char user[30], char pass[30]);
+int usersign_In(char user[30], char pass[30]);
 /*******************************************************************************
 Main - Contains Menu with appropriate functions
 *******************************************************************************/
 int main(void) {
 
-
-
-char user[30], pass[30];
+	main_menu();
+/** char user[30], pass[30];
 
     printf("\nUser:");
     scanf("%s",user);
     printf("\nPassword:");
     scanf("%s",pass);
 
-    sign_In(user, pass);
+    sign_In(user, pass); **/
+
+
 return 0;
 }
 
@@ -93,6 +98,14 @@ Outputs:
 - Read student list from the database
 - Exit program
 *******************************************************************************/
+void printMainMenu(void) {
+	printf("\n\n"
+	"1. Admin Login\n"
+	"2. User Login\n"
+	"3. Exit Program\n"
+	"Enter your choice>");
+}
+
 void printUserMenu(void) {
 	printf("\n\n"
 	"1. display student list\n"
@@ -165,9 +178,48 @@ int IsYearValid(int storYear)	{
 
 
 /******
-Login
+Admin Login
 ******/
-int sign_In(char user[30], char pass[30]){
+ 
+int main_menu(){
+	int Menuchoice=0;
+	int arraycount=0;
+	int count;
+	char user[30], pass[30];
+ printmainMenu();
+
+do {
+	    scanf("%d",&Menuchoice);
+	    case 1: {   /* Wont delete if class is empty */
+				adminsign_In(user, pass);
+			
+		    	 break;
+		}
+
+ case 2:	
+	{   /* Wont delete if class is empty */
+				usersign_In(user, pass);
+		    	 break;
+		}
+
+case 3:
+
+		   		/*exiting the program*/
+		   		exit(0);
+		  		break;
+
+		   default:
+
+		    /*for any value outside the menu - careless users*/
+		    printf("Invalid choice.\n");
+		    	 break;
+
+		        }
+
+	}
+
+
+int adminsign_In(char user[30], char pass[30]){
 	int Menuchoice=0;
 	FILE * fPointer;
 	int arraycount=0;
@@ -180,6 +232,15 @@ FILE *p;
 
 
     fscanf(p,"User: %s Password: %s",user2,pass2);
+
+   char user[30], pass[30];
+
+    printf("\nUser:");
+    scanf("%s",user);
+    printf("\nPassword:");
+    scanf("%s",pass);
+
+    /** sign_In(user, pass);**/
 
     if( (strcmp(user,user2)==0) && (strcmp(pass,pass2)==0) ){
        printAdminMenu();
@@ -364,7 +425,37 @@ do {
 
 
     }else{
-        printUserMenu();
+        printf("Whoops! Wrong Details. Returning you to main menu");
+        printMainMenu();
+    fclose(p);
+    return 0;
+}
+}
+
+
+/** USER MENU **/
+int usersign_In(char user[30], char pass[30]){
+	int Menuchoice=0;
+	FILE * fPointer;
+	int arraycount=0;
+	int count;
+	struct student studentlist[MAX_CLASS_SIZE];
+	FILE *p;
+    char user2[30], pass2[30];
+
+    p= fopen("users.txt", "r");
+
+        char user[30], pass[30];
+
+    printf("\nUser:");
+    scanf("%s",user);
+    printf("\nPassword:");
+    scanf("%s",pass);
+    fscanf(p,"User: %s Password: %s",user2,pass2);
+
+
+    if( (strcmp(user,user2)==0) && (strcmp(pass,pass2)==0) ){
+       printUserMenu();
 
 do {
 
@@ -375,7 +466,7 @@ do {
 
 	switch(Menuchoice)	{
 
-		case 1:		{
+		case 1:	{
      		 	 	 /* Check if class has students */
 		    	    if(arraycount==0)	{
 		    		    printf("Class is empty\n");
@@ -401,9 +492,8 @@ do {
 		    	break;
 			 }
 
-
-
-		case 2:	
+     	
+		 case 2:
 
 		   		/*exiting the program*/
 		   		exit(0);
@@ -417,9 +507,75 @@ do {
 
 		        }
 	     }
-               while(Menuchoice!=2);
-	}
+               while(Menuchoice!=6);
 
+
+    }else{
+        printf("Whoops! Wrong Details. Returning you to main menu");
+        printMainMenu();
     fclose(p);
     return 0;
 }
+
+/**
+int usersign_In(char user[30], char pass[30]){
+do {
+
+
+    /*Captures input for menu selection
+    scanf("%d",&Menuchoice);
+
+
+	switch(Menuchoice)	{
+
+		case 1:		{
+     		 	 	 /* Check if class has students 
+		    	    if(arraycount==0)	{
+		    		    printf("Class is empty\n");
+				  }
+
+				else	{
+				        printf("Name       Birthday   GPA   \n");
+			    	    printf("---------- ---------- ------\n");
+
+			/*displays the studentlist until the end of it 
+
+			    for (count=0;count<arraycount;count++) {
+			    		printf("%-10.10s",studentlist[count].name);
+                        printf(" %02d",studentlist[count].birthday.day);
+			    		printf("-");
+			    		printf("%02d",studentlist[count].birthday.month);
+			    		printf("-");
+			    		printf("%d",studentlist[count].birthday.year);
+			    		printf(" %.4f",studentlist[count].gpa);
+					printf("\n");
+			    		}
+					}
+		    	break;
+			 }
+
+
+
+		case 2:	
+
+		   		/*exiting the program
+		   		exit(0);
+		  		break;
+
+		   default:
+
+		    /*for any value outside the menu - careless users
+		    printf("Invalid choice.\n");
+		    	 break;
+
+		        }
+	     }
+               while(Menuchoice!=2);
+	} else{
+		 printf("Whoops! Wrong Details. Returning you to main menu");
+        printMainMenu();
+    fclose(p);
+    return 0;
+	} 
+
+	**/
