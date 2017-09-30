@@ -42,8 +42,9 @@ typedef struct driver{
   int exp_month;
   int exp_year;
   char lic_type;
-  char lic_num[3];
+  char lic_num[4];
   struct driver *next;
+  struct driver *prev;
 } driver_t;
 
 /*****************************************************************************
@@ -72,8 +73,7 @@ outputs:
 int main(void) {
   char choice;
   driver_t *firstDriver = NULL;
-  driver_t *latestDriver = NULL;
-  driver_t *temp = NULL;
+  driver_t *newestDriver = NULL;
 
   while(choice != '0')
   {
@@ -83,23 +83,16 @@ int main(void) {
 	  switch(choice)
 	  {
 		  case '1':
-			if(firstDriver == NULL){
-				firstDriver = addDriver(NULL);
-				latestDriver = firstDriver;
-			}
-			else{
-				latestDriver = addDriver(latestDriver);
-			}
+				if(firstDriver == NULL){
+					firstDriver = addDriver(NULL);
+					newestDriver = firstDriver;
+				}
+				else{
+					newestDriver = addDriver(newestDriver);
+				}
 			break;
 		  case '2':
-			temp = deleteDriver(firstDriver);
-			if(temp == firstDriver){
-				latestDriver = firstDriver;
-				firstDriver = temp;
-			}
-			else{
-				latestDriver = NULL;
-			}
+				firstDriver = deleteDriver(firstDriver);
 			break;
 		  case '3':
 			printList(firstDriver);
@@ -156,8 +149,16 @@ outputs:
 - driver_t pointer
 *****************************************************************************/
 driver_t *addDriver(driver_t *previous){
-	printf("\nAdding new driver\n");
 	driver_t *newDriver = malloc(sizeof(driver_t));
+	
+	newDriver->next = NULL;
+	newDriver->prev = NULL;
+	if(previous != NULL){
+		previous->next = newDriver;
+		newDriver->prev = previous;
+	}
+	
+	printf("\nAdding new driver\n");
 	printf("Enter firstname and surname seperated by a space\n> ");
 	scanf("%s %s", newDriver->firstName, newDriver->surname);
 	if(newDriver->firstName[0] > 96 && newDriver->firstName[0] < 123){
@@ -240,12 +241,8 @@ driver_t *addDriver(driver_t *previous){
 	newDriver->lic_num[1] = newDriver->firstName[0];
 	newDriver->lic_num[2] = newDriver->surname[0];
 	newDriver->lic_num[3] = '\0';
-	printf("Driver licence ID generated: %s", newDriver->lic_num);
-
-	newDriver->next = NULL;
-	if(previous != NULL){
-		previous->next = newDriver;
-	}
+	printf("Driver licence ID generated: %s\n\n", newDriver->lic_num);
+	
 	return newDriver;
 }
 
@@ -258,27 +255,29 @@ outputs:
 - driver_t pointer
 *****************************************************************************/
 driver_t *deleteDriver(driver_t *start){
-	char input[3];
+	char input[4];
 	driver_t *first = start;
-	driver_t *preDelete = start;
 	driver_t *delete = NULL;
 	
 	printf("Enter the licence ID to delete\n> ");
 	scanf("%s", input);
 	clr_stdin();
+	
 	while(first != NULL){
 		if(strcmp(input, first->lic_num) == 0){
 			delete = first;
 			break;
 		}
+		else{
+			printf("ID '%s' does not exist\n", input);
+			return start;
+		}
 		first = first->next;
 	}
-	while(preDelete != NULL && preDelete->next != delete){
-		preDelete = preDelete->next;
-	}
 	
-	if(start != NULL && delete == start){
+	if(delete == start){
 		if(delete->next != NULL){
+			delete->next->prev = NULL;
 			start = delete->next;
 		}
 		else{
@@ -287,17 +286,16 @@ driver_t *deleteDriver(driver_t *start){
 	}
 	else{
 		if(delete != NULL){
-			if(preDelete != NULL && delete->next != NULL){
-				preDelete->next = delete->next;
+			if(delete->prev != NULL){
+				delete->prev->next = delete->next;
 			}
-			else if(preDelete != NULL && delete->next == NULL){
-				preDelete->next = NULL;
+			if(delete->next != NULL){
+				delete->next->prev = delete->prev;
 			}
 		}
 	}
 	
 	if(delete != NULL){
-		delete = NULL;
 		free(delete);
 	}
 	return start;
@@ -324,11 +322,22 @@ outputs:
 void printList(driver_t *start){
 	driver_t *currentDriver = start;
 	int count = 0;
+	
+	/*driver_t *ahead = NULL;
+	driver_t *behind = NULL;*/
+	
 	while(currentDriver != NULL){
-		printf("(%c%c%c)----------------------------------------\n",
-		currentDriver->lic_num[0],
-		currentDriver->lic_num[1],
-		currentDriver->lic_num[2]);
+		/*ahead = currentDriver->next;
+		behind = currentDriver->prev;
+		printf("ID:%s Ahead:%s Behind:%s\n",
+			currentDriver->lic_num,
+			(ahead == NULL) ? "None" : ahead->lic_num,
+			(behind == NULL) ? "None" : behind->lic_num);
+			currentDriver = currentDriver->next;
+			ahead = NULL;
+			behind = NULL;*/
+		printf("(%s)----------------------------------------\n",
+		currentDriver->lic_num);
 
 		printf("Name: %s %s", currentDriver->firstName,
 		currentDriver->surname);
