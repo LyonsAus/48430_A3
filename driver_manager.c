@@ -24,20 +24,16 @@ Date of submission:
 #include <string.h>
 #include <math.h>
 
-#define MAX_NAME_SIZE 11
-
 /*****************************************************************************
 Struct definitions
 *****************************************************************************/
 typedef struct driver{
-  char firstName[MAX_NAME_SIZE];
-  char surname[MAX_NAME_SIZE];
+  char firstName[10];
+  char surname[10];
   int day;
   int month;
   int year;
-  int st_num;
-  char st_name[MAX_NAME_SIZE];
-  char st_type[MAX_NAME_SIZE];
+  char address[20];
   int p_code;
   int exp_month;
   int exp_year;
@@ -73,7 +69,6 @@ outputs:
 int main(void) {
   char choice;
   driver_t *firstDriver = NULL;
-  driver_t *newestDriver = NULL;
 
   while(choice != '0')
   {
@@ -83,16 +78,10 @@ int main(void) {
 	  switch(choice)
 	  {
 		  case '1':
-				if(firstDriver == NULL){
-					firstDriver = addDriver(NULL);
-					newestDriver = firstDriver;
-				}
-				else{
-					newestDriver = addDriver(newestDriver);
-				}
+			firstDriver = addDriver(firstDriver);
 			break;
 		  case '2':
-				firstDriver = deleteDriver(firstDriver);
+			firstDriver = deleteDriver(firstDriver);
 			break;
 		  case '3':
 			printList(firstDriver);
@@ -148,14 +137,24 @@ inputs:
 outputs:
 - driver_t pointer
 *****************************************************************************/
-driver_t *addDriver(driver_t *previous){
+driver_t *addDriver(driver_t *start){
 	driver_t *newDriver = malloc(sizeof(driver_t));
+	driver_t *latestDriver = start;
+	
+	if(start != NULL){
+		while(latestDriver->next != NULL){
+			latestDriver = latestDriver->next;
+		}
+	}
+	else{
+		latestDriver = NULL;
+	}
 	
 	newDriver->next = NULL;
 	newDriver->prev = NULL;
-	if(previous != NULL){
-		previous->next = newDriver;
-		newDriver->prev = previous;
+	if(latestDriver != NULL){
+		latestDriver->next = newDriver;
+		newDriver->prev = latestDriver;
 	}
 	
 	printf("\nAdding new driver\n");
@@ -172,7 +171,9 @@ driver_t *addDriver(driver_t *previous){
 	      (newDriver->month < 1 || newDriver->month > 12) ||
 	      (newDriver->year < 1900 || newDriver->year > 2017)){
 		printf("Enter date of birth in following format DD MM YYYY\n> ");
-		scanf("%d %d %d", &newDriver->day, &newDriver->month, &newDriver->year);
+		scanf("%d %d %d",
+		&newDriver->day, &newDriver->month, &newDriver->year);
+		clr_stdin();
 		
 		if(newDriver->day <= 0 || newDriver->day > 31){
 			printf("Invalid day, please enter day between 1 and 31\n");
@@ -185,15 +186,16 @@ driver_t *addDriver(driver_t *previous){
 		}
 	}
 
-	printf("Enter street number and street name seperated by a space\n> ");
-	scanf("%d %s %s", &newDriver->st_num, newDriver->st_name,
-	newDriver->st_type);
+	printf("Enter street address\n> ");
+	fgets(newDriver->address, 20, stdin);
+	strtok(newDriver->address, "\n");
 
 	while(newDriver->p_code < 1000 || newDriver->p_code > 2999){
 		printf("Enter postcode\n> ");
 		scanf("%d", &newDriver-> p_code);
 		if(newDriver->p_code < 1000 || newDriver->p_code > 2999){
-			printf("Invalid postcode, please enter postcode between 1000 and 2999\n");
+			printf(
+			"Invalid postcode, please enter postcode between 1000 and 2999\n");
 		}
 	}
 	
@@ -204,10 +206,12 @@ driver_t *addDriver(driver_t *previous){
 			   clr_stdin();
 			   
 			   if(newDriver->exp_month < 1 || newDriver->exp_month > 12){
-				   printf("Invalid month, please enter month between 1 and 12\n");
+				   printf(
+				   "Invalid month, please enter month between 1 and 12\n");
 			   }
 			   if(newDriver->exp_year < 2017 || newDriver->exp_year > 2022){
-				   printf("Invalid year, please enter year between 2017 and 2022\n");
+				   printf(
+				   "Invalid year, please enter year between 2017 and 2022\n");
 			   }
 	}
 
@@ -243,7 +247,12 @@ driver_t *addDriver(driver_t *previous){
 	newDriver->lic_num[3] = '\0';
 	printf("Driver licence ID generated: %s\n\n", newDriver->lic_num);
 	
-	return newDriver;
+	if(start == NULL){
+		return newDriver;
+	}
+	else{
+		return start;
+	}
 }
 
 /*****************************************************************************
@@ -325,7 +334,7 @@ void printList(driver_t *start){
 	
 	/*driver_t *ahead = NULL;
 	driver_t *behind = NULL;*/
-	
+	printf("\n");
 	while(currentDriver != NULL){
 		/*ahead = currentDriver->next;
 		behind = currentDriver->prev;
@@ -336,27 +345,35 @@ void printList(driver_t *start){
 			currentDriver = currentDriver->next;
 			ahead = NULL;
 			behind = NULL;*/
-		printf("(%s)----------------------------------------\n",
+		printf("(%s)--------------------------------------------\n",
 		currentDriver->lic_num);
-
-		printf("Name: %s %s", currentDriver->firstName,
+		int tmp;
+		int nameLen = strlen(currentDriver->firstName)
+		+ strlen(currentDriver->surname) + 1;
+		printf("Name:    %s %s", currentDriver->firstName,
 		currentDriver->surname);
-		printf("\t D.O.B: %02d-%02d-%4d\n", currentDriver->day,
+		for(tmp = nameLen; tmp < 20; tmp++){
+			printf(" ");
+		}
+		printf("D.O.B:    %02d-%02d-%4d\n", currentDriver->day,
 		currentDriver->month, currentDriver->year);
 
-		printf("Address: %d %s %s", currentDriver->st_num,
-		currentDriver->st_name,
-		currentDriver->st_type);
-		printf("\t Postcode: %d\n", currentDriver->p_code);
+		int addressLen = strlen(currentDriver->address);
+		printf("Address: %s", currentDriver->address);
+		for(tmp = addressLen; tmp < 20; tmp++){
+			printf(" ");
+		}
+		printf("Postcode: %d\n", currentDriver->p_code);
 
-		printf("Licence type: %c", currentDriver->lic_type);
-		printf("\t Expiry date: %02d-%4d\n\n",currentDriver->exp_month,
+		printf("Type:    %c", currentDriver->lic_type);
+		printf("                   ");
+		printf("EXP:      %02d-%4d\n\n",currentDriver->exp_month,
 		currentDriver->exp_year);
 
 		currentDriver = currentDriver->next;
 		count++;
 	}
-	printf("---------------------------------------------\n");
+	printf("-------------------------------------------------\n");
 	printf("Total driver(s): %d\n\n", count);
 }
 
