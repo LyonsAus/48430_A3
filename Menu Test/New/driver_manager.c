@@ -96,6 +96,18 @@ void mainMenu(){
  char choice;
  char name[50];
  char pass[50];
+ char first[50];
+/* char lic_num[50];*/
+ int line_num = 1;
+ int find_result = 0;
+ char temp[512];
+/* FILE * fPointer;*/
+ FILE *fp;
+
+/* p= fopen("database0.txt", "r");		*/
+
+/* fscanf(fp,"%s %s",lic_num,first); */
+
   while(choice != '0')
   {
 	  printmainMenu();
@@ -105,8 +117,8 @@ void mainMenu(){
 	  {
 		  case '1':
 
-			printf("Enter your Name> "); /** will Compare name to DB **/
-			scanf("%s", name);
+		printf("Enter your Name> "); /** will Compare name to DB **/
+		scanf("%s", name);
 			printf("\n");
 			printf("Enter your password> ");
 			scanf("%s", pass);
@@ -116,11 +128,42 @@ void mainMenu(){
     {        
         adminMenu();
          exit(1);
-    }else {
-    	driverMenu();
+    }else
+    if((fp = fopen("database0.txt", "r")) == NULL) {
+		return;
+	}
+
+	while(fgets(temp, 512, fp) != NULL) {
+		if((strstr(temp, first)) != NULL) {
+			printf("A match found on line: %d\n", line_num);
+			printf("\n%s\n", temp);
+			find_result++;
+		}
+		line_num++;
+	}
+
+	if(find_result == 0) {
+		printf("\nSorry, couldn't find a match.\n");
+	}
+	
+
+	if(fp) {
+		fclose(fp);
+	}
+   	return;
+
+    /** if(strcmp(name,first) == 0 && strcmp(pass,lic_num) == 0)
+    {
+    		driverMenu();
     }
+    else{
+    	printf("Incorrect details.\n");
+    exit(0);
+    } */
 
-
+		
+  
+    	
 			break;
 
 		case '2':
