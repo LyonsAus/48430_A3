@@ -78,10 +78,10 @@ int main(void) {
 	  switch(choice)
 	  {
 		  case '1':
-			firstDriver = addDriver(firstDriver);
+				firstDriver = addDriver(firstDriver);
 			break;
 		  case '2':
-			firstDriver = deleteDriver(firstDriver);
+				firstDriver = deleteDriver(firstDriver);
 			break;
 		  case '3':
 			printList(firstDriver);
@@ -89,11 +89,36 @@ int main(void) {
 		  case '4':
 			printf("Search list\n");
 			break;
-		  case '5':
-			printf("Encrypt and compress\n");
+		  case '5':;
+			driver_t *tst = firstDriver;
+			FILE *fPointer = fopen("database0.txt","w");
+			while(tst) 
+			{
+				fprintf(fPointer, /*"|%-10s| |%-10s| |%02d-%02d-%4d| |%-20s| |%d| |%02d-%4d| |%c| |%s|\n"*/
+				"%s %s %d %d %d %s %d %d %d %c %s",
+				tst->firstName, tst->surname, tst->day, tst->month, tst->year,
+				tst->address, tst->p_code, tst->exp_month, tst->exp_year,
+				tst->lic_type, tst->lic_num);
+				tst = tst->next;
+			}
+			fclose(fPointer);
 			break;
-		  case '6':
-			printf("Decompress and decrypt\n");
+		  case '6':;
+			FILE *fPointers = fopen("database0.txt","r");
+			/*fseek(fPointers, 0, SEEK_END);
+			long fileSize = ftell(fPointers);
+			rewind(fPointers);
+			int count = (int)(fileSize);
+			int boo = (sizeof(driver_t)) + 10;
+			printf("%d %d\n", count, boo);*/
+			driver_t *tmpDriver = malloc(sizeof(driver_t));
+			fscanf(fPointers, "%s %s %d %d %d %s %d %d %d %c %s",
+			tmpDriver->firstName, tmpDriver->surname, &tmpDriver->day, &tmpDriver->month, &tmpDriver->year,
+			tmpDriver->address, &tmpDriver->p_code, &tmpDriver->exp_month, &tmpDriver->exp_year,
+			&tmpDriver->lic_type, tmpDriver->lic_num);
+			tmpDriver->next = NULL;
+			printf("%s\n", tmpDriver->firstName);
+			fclose(fPointers);
 			break;
 		  case '7':
 			printf("Erase stored content\n");
@@ -122,8 +147,8 @@ void printMenu(){
 	       "2 = Remove driver\n"
 	       "3 = Display driver list\n"
 	       "4 = Search list\n"
-	       "5 = Encrypt and compress\n"
-	       "6 = Decompress and decrypt\n"
+	       "5 = Save list\n"
+	       "6 = Load list\n"
 	       "7 = Erase stored content\n"
 	       "0 = Exit program\n\n"
 	       "Enter choice: ");
@@ -160,6 +185,7 @@ driver_t *addDriver(driver_t *start){
 	printf("\nAdding new driver\n");
 	printf("Enter firstname and surname seperated by a space\n> ");
 	scanf("%s %s", newDriver->firstName, newDriver->surname);
+	clr_stdin();
 	if(newDriver->firstName[0] > 96 && newDriver->firstName[0] < 123){
 		newDriver->firstName[0] -= 32;
 	}
@@ -171,10 +197,9 @@ driver_t *addDriver(driver_t *start){
 	      (newDriver->month < 1 || newDriver->month > 12) ||
 	      (newDriver->year < 1900 || newDriver->year > 2017)){
 		printf("Enter date of birth in following format DD MM YYYY\n> ");
-		scanf("%d %d %d",
-		&newDriver->day, &newDriver->month, &newDriver->year);
+		scanf("%d %d %d", &newDriver->day, &newDriver->month,
+		&newDriver->year);
 		clr_stdin();
-		
 		if(newDriver->day <= 0 || newDriver->day > 31){
 			printf("Invalid day, please enter day between 1 and 31\n");
 		}
@@ -189,10 +214,12 @@ driver_t *addDriver(driver_t *start){
 	printf("Enter street address\n> ");
 	fgets(newDriver->address, 20, stdin);
 	strtok(newDriver->address, "\n");
+	/*clr_stdin();*/
 
 	while(newDriver->p_code < 1000 || newDriver->p_code > 2999){
 		printf("Enter postcode\n> ");
 		scanf("%d", &newDriver-> p_code);
+		clr_stdin();
 		if(newDriver->p_code < 1000 || newDriver->p_code > 2999){
 			printf(
 			"Invalid postcode, please enter postcode between 1000 and 2999\n");
@@ -265,29 +292,32 @@ outputs:
 *****************************************************************************/
 driver_t *deleteDriver(driver_t *start){
 	char input[4];
-	driver_t *first = start;
-	driver_t *delete = NULL;
+	driver_t *delete = start;
+	
+	if(delete == NULL){
+		printf("No data in list\n");
+		return NULL;
+	}
 	
 	printf("Enter the licence ID to delete\n> ");
 	scanf("%s", input);
 	clr_stdin();
 	
-	while(first != NULL){
-		if(strcmp(input, first->lic_num) == 0){
-			delete = first;
+	while(delete != NULL){
+		if(strcmp(input, delete->lic_num) == 0){
 			break;
 		}
-		else{
-			printf("ID '%s' does not exist\n", input);
-			return start;
-		}
-		first = first->next;
+		delete = delete->next;
+	}
+	if(delete == NULL){
+		printf("ID '%s' does not exist\n", input);
+		return start;
 	}
 	
-	if(delete == start){
+	if(delete == start && delete != NULL){
 		if(delete->next != NULL){
-			delete->next->prev = NULL;
-			start = delete->next;
+			start->next->prev = NULL;
+			start = start->next;
 		}
 		else{
 			start = NULL;
@@ -303,10 +333,8 @@ driver_t *deleteDriver(driver_t *start){
 			}
 		}
 	}
-	
-	if(delete != NULL){
-		free(delete);
-	}
+	delete = NULL;
+	free(delete);
 	return start;
 }
 
@@ -331,9 +359,13 @@ outputs:
 void printList(driver_t *start){
 	driver_t *currentDriver = start;
 	int count = 0;
-	
 	/*driver_t *ahead = NULL;
 	driver_t *behind = NULL;*/
+	if(currentDriver == NULL){
+		printf("No data in list\n");
+		return;
+	}
+	
 	printf("\n");
 	while(currentDriver != NULL){
 		/*ahead = currentDriver->next;
