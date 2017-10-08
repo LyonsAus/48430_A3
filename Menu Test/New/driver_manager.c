@@ -23,6 +23,8 @@ Date of submission:
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#define admin "admin"
+#define passlogin "123"
 
 /*****************************************************************************
 Struct definitions
@@ -91,7 +93,9 @@ mainMenu
 - Exit 
 *****************************************************************************/
 void mainMenu(){ 
- char choice;	
+ char choice;
+ char name[50];
+ char pass[50];
   while(choice != '0')
   {
 	  printmainMenu();
@@ -100,16 +104,30 @@ void mainMenu(){
 	  switch(choice)
 	  {
 		  case '1':
-			printf("Enter your Name>"); /** will Compare name to DB **/
-			/*scanf(); */
+
+			printf("Enter your Name> "); /** will Compare name to DB **/
+			scanf("%s", name);
 			printf("\n");
-			printf("Enter your License Number>"); /** will Compare # to DB **/
-			/*scanf();*/
+			printf("Enter your password> ");
+			scanf("%s", pass);
 			printf("\n");
+
+			if(strcmp(name,admin) == 0 && strcmp(pass,passlogin) == 0)
+    {        
+        adminMenu();
+         exit(1);
+    }else {
+    	driverMenu();
+    }
+
+
 			break;
 
 		case '2':
-		printf("About this program\n");
+		printf("********************************************************\n");
+		printf("*    About this program                                *\n");
+		printf("*    This is a program created by us.                  *\n");
+		printf("********************************************************\n");
 			break;
 
 		  case '0':
@@ -119,7 +137,6 @@ void mainMenu(){
 			printf("%s is an invalid input", &choice);
 	  }
   }
-
 }
 
 /*****************************************************************************
