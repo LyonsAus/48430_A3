@@ -64,7 +64,6 @@ void compressList();
 void decryptList();
 void decompressList();
 void clr_stdin(void);
-
 /*****************************************************************************
 main
 This is the main function of the program 
@@ -97,12 +96,13 @@ void mainMenu(){
  char name[50];
  char pass[50];
  char first[50];
-/* char lic_num[50];*/
+ char lic_num[50];
  int line_num = 1;
  int find_result = 0;
  char temp[512];
+ char *p;
 /* FILE * fPointer;*/
- FILE *fp;
+ FILE *fp=fopen("database0.txt","r");
 
 /* p= fopen("database0.txt", "r");		*/
 
@@ -129,7 +129,23 @@ void mainMenu(){
         adminMenu();
          exit(1);
     }else
-    if((fp = fopen("database0.txt", "r")) == NULL) {
+ while(fgets(temp,100,fp))
+{
+      p=strstr( temp , name);
+      if(p!=NULL)
+      {
+              driverMenu();
+              exit(0);
+       }
+}
+printf("Account Not found\n ");
+	
+
+
+
+
+
+    /*if((fp = fopen("database0.txt", "r")) == NULL) {
 		return;
 	}
 
@@ -150,7 +166,7 @@ void mainMenu(){
 	if(fp) {
 		fclose(fp);
 	}
-   	return;
+   	return; */
 
     /** if(strcmp(name,first) == 0 && strcmp(pass,lic_num) == 0)
     {
@@ -181,6 +197,7 @@ void mainMenu(){
 	  }
   }
 }
+
 
 /*****************************************************************************
 printmainMenu
@@ -247,6 +264,7 @@ adminMenu
 			break;
 		  case '8':
 			printf("Return to Main Menu\n");
+
 			break;
 		  case '0':
 			break;
@@ -327,7 +345,7 @@ printdriverMenu
 *****************************************************************************/
 
 void printdriverMenu(){
-	printf("\nMain Menu\n"
+	printf("\nDriver Menu\n"
 	       "1 = Search list for User\n"
 	       "2 = Return to Main Menu\n"
 	       "0 = Exit program\n\n"
