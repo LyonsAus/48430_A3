@@ -25,12 +25,13 @@ Date of submission:
 #include <math.h>
 #define admin "admin"
 #define passlogin "123"
+
 /*****************************************************************************
 Struct definitions
 *****************************************************************************/
 typedef struct driver{
-  char firstName[11];
-  char surname[11];
+  char firstName[10];
+  char surname[10];
   int day;
   int month;
   int year;
@@ -63,7 +64,6 @@ void compressList();
 void decryptList();
 void decompressList();
 void clr_stdin(void);
-
 /*****************************************************************************
 main
 This is the main function of the program 
@@ -72,10 +72,14 @@ inputs:
 outputs:
 - integer
 *****************************************************************************/
-int main(void){
-mainMenu();
+int main(void) {
+  
+  mainMenu();
+
   return 0;
 }
+
+
 
 /*****************************************************************************
 mainMenu
@@ -97,8 +101,6 @@ void mainMenu(){
  int find_result = 0;
  char temp[512];
  char *p;
- char *z;
-
 /* FILE * fPointer;*/
  FILE *fp=fopen("database0.txt","r");
 
@@ -109,7 +111,7 @@ void mainMenu(){
   while(choice != '0')
   {
 	  printmainMenu();
-	  scanf(" %c", &choice);
+	  scanf("%c", &choice);
 	  clr_stdin();
 	  switch(choice)
 	  {
@@ -118,7 +120,7 @@ void mainMenu(){
 		printf("Enter your Name> "); /** will Compare name to DB **/
 		scanf("%s", name);
 			printf("\n");
-			printf("Enter your license or Password> ");
+			printf("Enter your password> ");
 			scanf("%s", pass);
 			printf("\n");
 
@@ -127,16 +129,11 @@ void mainMenu(){
         adminMenu();
          exit(1);
     }else
- 
-
-
  while(fgets(temp,100,fp))
 {
       p=strstr( temp , name);
-      z=strstr( temp , pass);
-      if(p!=NULL && z!=NULL)
+      if(p!=NULL)
       {
-      			fclose(fp);
               driverMenu();
               exit(0);
        }
@@ -193,7 +190,6 @@ printf("Account Not found\n ");
 			break;
 
 		  case '0':
-		  exit(0);
 			break;
 
 		  default:
@@ -201,9 +197,6 @@ printf("Account Not found\n ");
 	  }
   }
 }
-
-
-
 
 
 /*****************************************************************************
@@ -226,24 +219,33 @@ void printmainMenu(){
 }
 
 
-
-/** 
-ADMIN MENU
-**/
-void adminMenu(){ 
-char choice;
-  driver_t *firstDriver = NULL;
-
-  while(choice != '0'){
+/*****************************************************************************
+adminMenu
+- Add Driver
+- Delete Driver
+- Print List
+- Search List
+- Encrypt and Compress
+- Decompress and Decrypt
+- Erase Stored Data
+- Return to Login
+- Exit
+*****************************************************************************/
+ void adminMenu(){ 
+ char choice;
+ driver_t *firstDriver = NULL;	
+  while(choice != '0')
+  {
 	  printadminMenu();
-	  scanf(" %c", &choice);
+	  scanf("%c", &choice);
 	  clr_stdin();
-	  switch(choice){
+	  switch(choice)
+	  {
 		  case '1':
-				firstDriver = addDriver(firstDriver);
+			firstDriver = addDriver(firstDriver);
 			break;
 		  case '2':
-				firstDriver = deleteDriver(firstDriver);
+			firstDriver = deleteDriver(firstDriver);
 			break;
 		  case '3':
 			printList(firstDriver);
@@ -251,66 +253,19 @@ char choice;
 		  case '4':
 			printf("Search list\n");
 			break;
-		  case '5':;
-			driver_t *tst = firstDriver;
-			FILE *fPointer = fopen("database0.txt","w");
-			while(tst){
-				fprintf(fPointer, "%-10s %-10s %02d %02d %4d %-20s %d %02d %4d %c %s\n"
-				/*"%s %s %d %d %d %s %d %d %d %c %s"*/,
-				tst->firstName, tst->surname, tst->day, tst->month, tst->year,
-				tst->address, tst->p_code, tst->exp_month, tst->exp_year,
-				tst->lic_type, tst->lic_num);
-				tst = tst->next;
-			}
-			fclose(fPointer);
+		  case '5':
+			printf("Encrypt and compress\n");
 			break;
-		  case '6':;
-			FILE *fPointers = fopen("database0.txt","r");
-			firstDriver = NULL;
-			fseek(fPointers, 0, SEEK_END);
-			long fileSize = ftell(fPointers);
-			rewind(fPointers);
-			int nodeCount = (int)(fileSize) / ((sizeof(driver_t)) - 10);
-			int loop = 0;
-			for(loop = 0; loop < nodeCount; ++loop){
-				fseek(fPointers, (((sizeof(driver_t)) - 10) * loop), SEEK_SET);
-				if(firstDriver == NULL){
-					firstDriver = malloc(sizeof(driver_t));
-					fscanf(fPointers, "%s %s %d %d %d %s %d %d %d %c %s",
-					firstDriver->firstName, firstDriver->surname,
-					&firstDriver->day, &firstDriver->month, &firstDriver->year,
-					firstDriver->address, &firstDriver->p_code,
-					&firstDriver->exp_month, &firstDriver->exp_year,
-					&firstDriver->lic_type, firstDriver->lic_num);
-					firstDriver->next = NULL;
-					firstDriver->prev = NULL;
-				}
-				else{
-					driver_t *refDriver = firstDriver;
-					driver_t *newDriver = malloc(sizeof(driver_t));
-					while(refDriver->next != NULL){
-						refDriver = refDriver->next;
-					}
-					fscanf(fPointers, "%s %s %d %d %d %s %d %d %d %c %s",
-					newDriver->firstName, newDriver->surname,
-					&newDriver->day, &newDriver->month, &newDriver->year,
-					newDriver->address, &newDriver->p_code,
-					&newDriver->exp_month, &newDriver->exp_year,
-					&newDriver->lic_type, newDriver->lic_num);
-					refDriver->next = newDriver;
-					newDriver->next = NULL;
-					newDriver->prev = NULL;
-				}
-			}
-			fclose(fPointers);
+		  case '6':
+			printf("Decompress and decrypt\n");
 			break;
 		  case '7':
 			printf("Erase stored content\n");
 			break;
-		case'8':
+		  case '8':
+			printf("Return to Main Menu\n");
 
-		mainMenu();
-		break;
+			break;
 		  case '0':
 			break;
 
@@ -318,29 +273,35 @@ char choice;
 			printf("%s is an invalid input", &choice);
 	  }
   }
+
 }
+
 /*****************************************************************************
 printadminMenu
-This function prints the main menu of the program 
-inputs:
-- none
-outputs:
-- none
+- Add Driver
+- Delete Driver
+- Print List
+- Search List
+- Encrypt and Compress
+- Decompress and Decrypt
+- Erase Stored Data
+- Return to Login
+- Exit
 *****************************************************************************/
+
 void printadminMenu(){
 	printf("\nAdmin Menu\n"
 	       "1 = Add driver\n"
 	       "2 = Remove driver\n"
 	       "3 = Display driver list\n"
 	       "4 = Search list\n"
-	       "5 = Save list\n"
-	       "6 = Load list\n"
+	       "5 = Encrypt and compress\n"
+	       "6 = Decompress and decrypt\n"
 	       "7 = Erase stored content\n"
-	       "8 = Logout\n"
+	       "8 = Return to Main Menu\n"
 	       "0 = Exit program\n\n"
 	       "Enter choice: ");
 }
-
 
 
 /*****************************************************************************
@@ -355,7 +316,7 @@ drivertMenu
   while(choice != '0')
   {
 	  printdriverMenu();
-	  scanf(" %c", &choice);
+	  scanf("%c", &choice);
 	  clr_stdin();
 	  switch(choice)
 	  {
@@ -364,7 +325,6 @@ drivertMenu
 			break;
 		  case '2':
 			printf("Return to Main Menu\n");
-			mainMenu();
 			break;
 		  case '0':
 			break;
@@ -393,10 +353,14 @@ void printdriverMenu(){
 }
 
 
-
-
-
-
+/*****************************************************************************
+printmainMenu
+This function prints the main menu of the program 
+inputs:
+- none
+outputs:
+- none
+*****************************************************************************/
 
 /*****************************************************************************
 addDriver
@@ -429,7 +393,6 @@ driver_t *addDriver(driver_t *start){
 	printf("\nAdding new driver\n");
 	printf("Enter firstname and surname seperated by a space\n> ");
 	scanf("%s %s", newDriver->firstName, newDriver->surname);
-	clr_stdin();
 	if(newDriver->firstName[0] > 96 && newDriver->firstName[0] < 123){
 		newDriver->firstName[0] -= 32;
 	}
@@ -441,9 +404,10 @@ driver_t *addDriver(driver_t *start){
 	      (newDriver->month < 1 || newDriver->month > 12) ||
 	      (newDriver->year < 1900 || newDriver->year > 2017)){
 		printf("Enter date of birth in following format DD MM YYYY\n> ");
-		scanf("%d %d %d", &newDriver->day, &newDriver->month,
-		&newDriver->year);
+		scanf("%d %d %d",
+		&newDriver->day, &newDriver->month, &newDriver->year);
 		clr_stdin();
+		
 		if(newDriver->day <= 0 || newDriver->day > 31){
 			printf("Invalid day, please enter day between 1 and 31\n");
 		}
@@ -458,12 +422,10 @@ driver_t *addDriver(driver_t *start){
 	printf("Enter street address\n> ");
 	fgets(newDriver->address, 20, stdin);
 	strtok(newDriver->address, "\n");
-	/*clr_stdin();*/
 
 	while(newDriver->p_code < 1000 || newDriver->p_code > 2999){
 		printf("Enter postcode\n> ");
 		scanf("%d", &newDriver-> p_code);
-		clr_stdin();
 		if(newDriver->p_code < 1000 || newDriver->p_code > 2999){
 			printf(
 			"Invalid postcode, please enter postcode between 1000 and 2999\n");
@@ -536,32 +498,29 @@ outputs:
 *****************************************************************************/
 driver_t *deleteDriver(driver_t *start){
 	char input[4];
-	driver_t *delete = start;
-	
-	if(delete == NULL){
-		printf("No data in list\n");
-		return NULL;
-	}
+	driver_t *first = start;
+	driver_t *delete = NULL;
 	
 	printf("Enter the licence ID to delete\n> ");
 	scanf("%s", input);
 	clr_stdin();
 	
-	while(delete != NULL){
-		if(strcmp(input, delete->lic_num) == 0){
+	while(first != NULL){
+		if(strcmp(input, first->lic_num) == 0){
+			delete = first;
 			break;
 		}
-		delete = delete->next;
-	}
-	if(delete == NULL){
-		printf("ID '%s' does not exist\n", input);
-		return start;
+		else{
+			printf("ID '%s' does not exist\n", input);
+			return start;
+		}
+		first = first->next;
 	}
 	
-	if(delete == start && delete != NULL){
+	if(delete == start){
 		if(delete->next != NULL){
-			start->next->prev = NULL;
-			start = start->next;
+			delete->next->prev = NULL;
+			start = delete->next;
 		}
 		else{
 			start = NULL;
@@ -577,8 +536,10 @@ driver_t *deleteDriver(driver_t *start){
 			}
 		}
 	}
-	delete = NULL;
-	free(delete);
+	
+	if(delete != NULL){
+		free(delete);
+	}
 	return start;
 }
 
@@ -603,13 +564,9 @@ outputs:
 void printList(driver_t *start){
 	driver_t *currentDriver = start;
 	int count = 0;
+	
 	/*driver_t *ahead = NULL;
 	driver_t *behind = NULL;*/
-	if(currentDriver == NULL){
-		printf("No data in list\n");
-		return;
-	}
-	
 	printf("\n");
 	while(currentDriver != NULL){
 		/*ahead = currentDriver->next;
