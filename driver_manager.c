@@ -27,6 +27,10 @@ Date of submission:
 
 #define DB_FILE_NAME "database"
 #define len(x) ((int)log10(x)+1
+#define admin "Admin"
+#define passlogin "123"
+#define NORMAL "\x1b[0m"
+#define BOLD "\x1b[1m"
 /*****************************************************************************
 Struct definitions
 *****************************************************************************/
@@ -57,7 +61,11 @@ typedef struct node Node;
 /*****************************************************************************
 Function prototypes
 *****************************************************************************/
-void printMenu();
+void printLoginMenu();
+void printAdminMenu();
+void printDriverMenu();
+void adminMenu();
+void driverMenu();
 driver_t *addDriver(driver_t *previous);
 driver_t *deleteDriver(driver_t *start);
 void deleteList();
@@ -66,12 +74,13 @@ void searchList();
 void encrypt(driver_t* start);
 void decryptList();
 void clr_stdin(void);
+void exitConfirm();
+void logoutConfirm(int mode);
 
-
-void buildHuffmanTree(Node **tree);								/*new*/
-void fillTable(int codeTable[], Node *tree, int Code);			/*new*/
-void compressList(FILE *input, FILE *output, int codeTable[]);	/*new*/
-void decompressList(FILE *input, FILE *output, Node *tree);	/*new*/
+void buildHuffmanTree(Node **tree);
+void fillTable(int codeTable[], Node *tree, int Code);
+void compressList(FILE *input, FILE *output, int codeTable[]);
+void decompressList(FILE *input, FILE *output, Node *tree);
 void invertCodes(int codeTable[],int codeTable2[]);
 
 /*****************************************************************************
@@ -83,145 +92,137 @@ outputs:
 - integer
 *****************************************************************************/
 int main(void){
-  char choice;
-  driver_t *firstDriver = NULL;
-  int compress;
-  Node *tree;								/*new*/
-  int codeTable[27], codeTable2[27];		/*new*/
-  FILE *input, *output;
+	char choice;
+	char name[50];
+	char pass[50];
+	/*char first[50];
+	char lic_num[50];*/
+	char temp[512];
+	char *p;
+	char *z;
+	/* p= fopen("database0.txt", "r");		*/
+	/* fscanf(fp,"%s %s",lic_num,first); */
+	while(choice != '0'){
+		printLoginMenu();
+		scanf(" %c", &choice);
+		clr_stdin();
+		switch(choice){
 
-  while(choice != '0'){
-	  printMenu();
-	  scanf("%c", &choice);
-	  clr_stdin();
-	  switch(choice){
-		  case '1':
-				firstDriver = addDriver(firstDriver);
-			break;
-		  case '2':
-				firstDriver = deleteDriver(firstDriver);
-			break;
-		  case '3':
-			printList(firstDriver);
-			break;
-		  case '4':
-			printf("Search list\n");
-			break;
-		  case '5':;
-			driver_t *tst = firstDriver;
-			FILE *fPointer = fopen("database0.txt","w");
-			while(tst){
-				fprintf(fPointer, "%-10s %-10s %02d %02d %4d %-20s %d %02d %4d %c %s\n"
-				/*"%s %s %d %d %d %s %d %d %d %c %s"*/,
-				tst->firstName, tst->surname, tst->day, tst->month, tst->year,
-				tst->address, tst->p_code, tst->exp_month, tst->exp_year,
-				tst->lic_type, tst->lic_num);
-				tst = tst->next;
-			}
-			fclose(fPointer);
-			break;
-		  case '6':;
-			FILE *fPointers = fopen("database0.txt","r");
-			firstDriver = NULL;
-			fseek(fPointers, 0, SEEK_END);
-			long fileSize = ftell(fPointers);
-			rewind(fPointers);
-			int nodeCount = (int)(fileSize) / ((sizeof(driver_t)) - 23);
-			int loop = 0;
-			for(loop = 0; loop < nodeCount; ++loop){
-				fseek(fPointers, (((sizeof(driver_t)) - 23) * loop), SEEK_SET);
-				if(firstDriver == NULL){
-					firstDriver = malloc(sizeof(driver_t));
-					fscanf(fPointers, "%s %s %d %d %d %s %d %d %d %c %s",
-					firstDriver->firstName, firstDriver->surname,
-					&firstDriver->day, &firstDriver->month, &firstDriver->year,
-					firstDriver->address, &firstDriver->p_code,
-					&firstDriver->exp_month, &firstDriver->exp_year,
-					&firstDriver->lic_type, firstDriver->lic_num);
-					firstDriver->next = NULL;
-					firstDriver->prev = NULL;
+			case '1':
+				printf("Enter your name\n>"); /** will Compare name to DB **/
+				scanf("%s", name);
+				clr_stdin();
+				if(name[0]>=97 && name[0]<=122){
+					name[0] -= 32;
+				}
+				printf("Enter your license or password\n>");
+				scanf("%s", pass);
+				clr_stdin();
+				if(strcmp(name, admin) == 0 && strcmp(pass, passlogin) == 0){
+					/*system("clear");*/	
+					adminMenu();
 				}
 				else{
-					driver_t *refDriver = firstDriver;
-					driver_t *newDriver = malloc(sizeof(driver_t));
-					while(refDriver->next != NULL){
-						refDriver = refDriver->next;
+					FILE *fp=fopen("database0.txt","r");
+					while(fgets(temp,100,fp)){
+						p=strstr(temp , name);
+						z=strstr(temp , pass);
+						if(p != NULL && z != NULL){
+							fclose(fp);
+							/*system("clear");*/
+							driverMenu();
+						}
 					}
-					fscanf(fPointers, "%s %s %d %d %d %s %d %d %d %c %s",
-					newDriver->firstName, newDriver->surname,
-					&newDriver->day, &newDriver->month, &newDriver->year,
-					newDriver->address, &newDriver->p_code,
-					&newDriver->exp_month, &newDriver->exp_year,
-					&newDriver->lic_type, newDriver->lic_num);
-					refDriver->next = newDriver;
-					newDriver->next = NULL;
-					newDriver->prev = refDriver;
 				}
-			}
-			fclose(fPointers);
-			break;
-		  case '7':
-			printf("Erase stored content\n");
-			break;
-		  case '8':
-		  	buildHuffmanTree(&tree);
-			fillTable(codeTable, tree, 0);
-			invertCodes(codeTable,codeTable2);
-		  	printf("Type 1 to compress and 2 to decompress:");
-			scanf("%d",&compress);
-      clr_stdin();
+					/*system("clear");
+						printf("\nLogin Details are incorrect. Please Try again!\n");
+						mainMenu();
 
-		  	if (compress==1)
-			{
-				input = fopen("database0.txt", "r");
-				output = fopen("compressed.txt","w");
-				compressList(input,output,codeTable2);
-				fclose(output);
-        fclose(input);
-			}
-			else
-			{
-			/*to change the file name for decompression*/
-				if(rename("compressed.txt", "decompressed1.txt") == 0)
-				{
-					printf("File has been decompressed.\n");
+					if((fp = fopen("database0.txt", "r")) == NULL){
+						return 0;
+					}
+					while(fgets(temp, 512, fp) != NULL){
+						if((strstr(temp, first)) != NULL){
+							exit(0);
+							printf("A match found on line: %d\n", line_num);
+							printf("\n%s\n", temp);
+						}
+					}
+
+					if(find_result == 0){
+						system("clear");
+						printf("\nLogin Details are incorrect. Please Try again!\n");
+						mainMenu();
+					}
+						if(find_result == 4){
+						printf("\nSorry, Too many login attempts. Exiting Program!\n");
+						exit(0);
+					}
+					if(fp){
+						fclose(fp);
+					}
+					return 0;
+					if(strcmp(name,first) == 0 && strcmp(pass,lic_num) == 0){
+					system("clear");				
+					driverMenu();
+					}
+					else{
+						system("clear");
+						printf("Login Details are incorrect. Please Try again!.\n");
+						printf("\n");
+				
+						exit(0);
+					}*/
+				break;
+					
+			case '2':
+				printf("*************************************************\n");
+				printf("*    About this program                         *\n");
+				printf("*    This is a program created by us.           *\n");
+				printf("*************************************************\n");
+				break;
+				
+			case '0':
+				exitConfirm();
+				break;
+				
+			default:
+				if(choice == '\n'){
+					printf("Please choose an option from the menu");
 				}
-				else
-				{
-					printf("Error, database not encrypted.\n");
+				else{
+					printf("%s is an invalid input", &choice);
 				}
-				/*input = fopen("decompressed1.txt","r");
-				output = fopen("database1.txt", "w");*/
-				decompressList(input,output, tree);
-				/*fclose(output);
-        fclose(input);*/
-			}
-
-			break;
-
-		  case '9':
-        encrypt(firstDriver);
-
-
-		  case '0':
-			break;
-
-		  default:
-			printf("%s is an invalid input", &choice);
-	  }
-  }
-  return 0;
+		}
+	}
+	return 0;
 }
 
 /*****************************************************************************
-printMenu
-This function prints the main menu of the program
+printLoginMenu
+This function prints the login menu of the program
 inputs:
 - none
 outputs:
 - none
 *****************************************************************************/
-void printMenu(){
+void printLoginMenu(){
+	printf("\nMain Menu\n"
+	       "1 = Login\n"
+	       "2 = About\n"
+	       "0 = Exit program\n\n"
+	       "Enter choice: ");
+}
+
+/*****************************************************************************
+printAdminMenu
+This function prints the admin main menu of the program
+inputs:
+- none
+outputs:
+- none
+*****************************************************************************/
+void printAdminMenu(){
 	printf("\nMain Menu\n"
 	       "1 = Add driver\n"
 	       "2 = Remove driver\n"
@@ -232,8 +233,217 @@ void printMenu(){
 	       "7 = Erase stored content\n"
 	       "8 = Compress Menu\n"
 	       "9 = Encryption Menu\n"
-	       "0 = Exit program\n\n"
+	       "0 = Log out\n\n"
 	       "Enter choice: ");
+}
+
+/*****************************************************************************
+printDriverMenu
+This function prints the driver menu of the program
+inputs:
+- none
+outputs:
+- none
+*****************************************************************************/
+void printDriverMenu(){
+	printf("\nDriver Menu\n"
+	       "1 = Search list for User\n"
+	       "0 = Log out\n\n"
+	       "Enter choice: ");
+}
+
+/*****************************************************************************
+adminMenu - This function 
+inputs:
+- none
+outputs:
+- none
+*****************************************************************************/
+void adminMenu(){
+	char choice;
+	driver_t *firstDriver = NULL;
+	int compress;
+	Node *tree;
+	int codeTable[27], codeTable2[27];
+	FILE *input, *output;
+	
+	while(choice != '0'){
+		printAdminMenu();
+		scanf("%c", &choice);
+		clr_stdin();
+		switch(choice){
+			case '1':
+				firstDriver = addDriver(firstDriver);
+				break;
+			case '2':
+				firstDriver = deleteDriver(firstDriver);
+				break;
+			case '3':
+				printList(firstDriver);
+				break;
+			case '4':
+				printf("Search list\n");
+				break;
+			case '5':;
+				driver_t *tst = firstDriver;
+				FILE *saveP = fopen("database0.txt","w");
+				while(tst){
+					fprintf(saveP,
+					"%s %-10s %-10s %02d %02d %4d %-20s %d %02d %4d %c\n",
+					tst->lic_num, tst->firstName, tst->surname, tst->day,
+					tst->month, tst->year, tst->address, tst->p_code,
+					tst->exp_month, tst->exp_year, tst->lic_type);
+					tst = tst->next;
+				}
+				fclose(saveP);
+				break;
+			case '6':;
+				FILE *fPointers = fopen("database0.txt","r");
+				firstDriver = NULL;
+				fseek(fPointers, 0, SEEK_END);
+				long fileSize = ftell(fPointers);
+				rewind(fPointers);
+				int nodeCount = (int)(fileSize) / ((sizeof(driver_t)) - 10);
+				int loop = 0;
+				for(loop = 0; loop < nodeCount; ++loop){
+					fseek(fPointers, (((sizeof(driver_t)) - 10) * loop), SEEK_SET);
+					if(firstDriver == NULL){
+						firstDriver = malloc(sizeof(driver_t));
+						fscanf(fPointers, "%s %s %s %d %d %d %s %d %d %d %c",
+						firstDriver->lic_num, firstDriver->firstName,
+						firstDriver->surname, &firstDriver->day,
+						&firstDriver->month, &firstDriver->year,
+						firstDriver->address, &firstDriver->p_code,
+						&firstDriver->exp_month, &firstDriver->exp_year,
+						&firstDriver->lic_type);
+						firstDriver->next = NULL;
+						firstDriver->prev = NULL;
+					}
+					else{
+						driver_t *refDriver = firstDriver;
+						driver_t *newDriver = malloc(sizeof(driver_t));
+						while(refDriver->next != NULL){
+							refDriver = refDriver->next;
+						}
+						fscanf(fPointers, "%s %s %s %d %d %d %s %d %d %d %c",
+						newDriver->lic_num, newDriver->firstName,
+						newDriver->surname,	&newDriver->day,
+						&newDriver->month, &newDriver->year,
+						newDriver->address, &newDriver->p_code,
+						&newDriver->exp_month, &newDriver->exp_year,
+						&newDriver->lic_type);
+						refDriver->next = newDriver;
+						newDriver->next = NULL;
+						newDriver->prev = refDriver;
+					}
+				}
+				fclose(fPointers);
+				break;
+			case '7':
+				printf("Erase stored content\n");
+				break;
+			case '8':
+				buildHuffmanTree(&tree);
+				fillTable(codeTable, tree, 0);
+				invertCodes(codeTable,codeTable2);
+				printf("Type 1 to compress and 2 to decompress:");
+				scanf("%d",&compress);
+				clr_stdin();
+
+				if (compress==1){
+					input = fopen("database0.txt", "r");
+					output = fopen("compressed.txt","w");
+					compressList(input,output,codeTable2);
+					fclose(output);
+					fclose(input);
+				}
+				else{
+					if(rename("compressed.txt", "decompressed1.txt") == 0){
+						printf("File has been decompressed.\n");
+					}
+					else{
+						printf("Error, database not encrypted.\n");
+					}
+					/*input = fopen("decompressed1.txt","r");
+					output = fopen("database1.txt", "w");*/
+					decompressList(input,output, tree);
+					/*fclose(output);
+				fclose(input);*/
+				}
+				break;
+			case '9':
+				encrypt(firstDriver);
+				break;
+			case '0':
+				logoutConfirm(1);
+				break;
+			default:
+				printf("%s is an invalid input", &choice);
+		}
+	}
+}
+
+/*****************************************************************************
+driverMenu
+This function contains the switch case for the driver menu
+inputs:
+- none
+outputs:
+- none
+*****************************************************************************/
+void driverMenu(){
+	char choice;
+	while(choice != '0'){
+		printDriverMenu();
+		scanf("%c", &choice);
+		clr_stdin();
+		switch(choice){
+			case '1':
+				printf("Search list\n");
+				break;
+			case '0':
+				logoutConfirm(2);
+				break;
+			default:
+				printf("%s is an invalid input", &choice);
+		}
+	}
+}
+
+/*****************************************************************************
+driverMenu
+This function contains the switch case for the driver menu
+inputs:
+- none
+outputs:
+- none
+*****************************************************************************/
+void logoutConfirm(int mode){
+	printf("Are you sure you want to logout?\n>");
+	char choice;
+	while(choice != 'y'){
+		scanf("%c", &choice);
+		clr_stdin();
+		switch(choice){
+			case 'y':
+				/*system("clear");*/
+				printf("Sad to see you go!\n");
+				break;
+			case 'n':
+				/*system("clear");*/
+				printf("Returning you to your menu!");
+				if(mode == 1){
+					adminMenu();
+					break;
+				}
+				else if(mode == 2){
+					driverMenu();
+					break;
+				}
+			default:
+				printf("%s is an invalid input", &choice);
+		}
+	}
 }
 
 /*****************************************************************************
@@ -296,7 +506,6 @@ driver_t *addDriver(driver_t *start){
 	printf("Enter street address\n> ");
 	fgets(newDriver->address, 20, stdin);
 	strtok(newDriver->address, "\n");
-	/*clr_stdin();*/
 
 	while(newDriver->p_code < 1000 || newDriver->p_code > 2999){
 		printf("Enter postcode\n> ");
@@ -332,7 +541,6 @@ driver_t *addDriver(driver_t *start){
 		printf("R = rider \t\t H = Heavy rigid\n");
 		printf("L = Light rigid \t B = Multi combination\n> ");
 		scanf("%c", &newDriver->lic_type);
-		clr_stdin();
 
 		if(newDriver->lic_type == 'c' || newDriver->lic_type == 'r' ||
 		   newDriver->lic_type == 'l' || newDriver->lic_type == 'm' ||
@@ -365,8 +573,7 @@ driver_t *addDriver(driver_t *start){
 }
 
 /*****************************************************************************
-deleteDriver
-This function removes nth driver from the list
+deleteDriver - This function removes nth driver from the list
 inputs:
 - driver_t pointer
 outputs:
@@ -377,7 +584,7 @@ driver_t *deleteDriver(driver_t *start){
 	driver_t *delete = start;
 
 	if(delete == NULL){
-		printf("No data in list\n");
+		printf("\nNo data in list\n");
 		return NULL;
 	}
 
@@ -503,7 +710,7 @@ void searchList(){
 }
 
 /*****************************************************************************
-
+encrypt - This function encrypts every data of the entire list
 inputs:
 -
 outputs:
@@ -517,201 +724,223 @@ void encrypt(driver_t* start)
     scanf("%1d%1d%1d%1d%1d", &key[0], &key[1], &key[2], &key[3], &key[4]);
 	clr_stdin();
 
-    /*char alphanum[13][5]={
-        {'a','b','c','d','e'},1
-        {'f','g','h','i','j'},2
-        {'k','l','m','n','o'},3
-        {'p','q','r','s','t'},4
-        {'u','v','w','x','y'},5
-        {'z','A','B','C','D'},6
-        {'E','F','G','H','I'},7
-        {'J','K','L','M','N'},8
-        {'O','P','Q','R','S'},9
-        {'T','U','V','W','X'},10
-        {'Y','Z','-',' ','='},11
-        {'1','2','3','4','5'},12
-        {'6','7','8','9','0'},13
-        };
-
-    char secret[13][5]={
-        {'U','5','V','W','X'},1
-        {'T','b','c','d','e'},2
-        {'Y','Z','-',' ','='},3
-        {'k','l','v','n','o'},4
-        {'f','g','h','8','j'},5
-        {'3','m','w','x','y'},6
-        {'E','q','r','R','t'},7
-        {'6','7','i','9','0'},8
-        {'p','F','G','H','I'},9
-        {'z','A','B','1','D'},10
-        {'J','K','L','M','N'},11
-        {'O','P','Q','s','S'},12
-        {'C','2','u','4','a'},13
-        };*/
-
   char alphanum[8][8]={
         {'a','b','R','d','e','f','g','h'},
-	{'i','j','k','l','m','n','o','p'},
-	{'q','r','s','t','u','v','w','x'},
-	{'y','z','A','B','C','D','E','F'},
-	{'G','H','I','J','K','L','M','N'},
-	{'O','P','Q','T','S','c','U','V'},
-	{'W','X','Y','Z','1','2','3','4'},
-	{'5','6','7','8','9','0',' ','='},
+		{'i','j','k','l','m','n','o','p'},
+		{'q','r','s','t','u','v','w','x'},
+		{'y','z','A','B','C','D','E','F'},
+		{'G','H','I','J','K','L','M','N'},
+		{'O','P','Q','T','S','c','U','V'},
+		{'W','X','Y','Z','1','2','3','4'},
+		{'5','6','7','8','9','0',' ','='},
         };
 
     char secret[8][8]={
-	{'k','f','B','l','J','m','I','y'},
-	{'M','e','L','P','W','b','o','H'},
-	{'j','V','A','c','z','w','T','x'},
-	{'t','r','K','q','G','=','Z','1'},
-	{'C','N','7','d','p','Y','4','Q'},
-	{'g','U','8','v','n','D','a','X'},
-	{'6','i',' ','O','0','3','s','9'},
-	{'E','u','F','5','S','2','h','R'},
+		{'k','f','B','l','J','m','I','y'},
+		{'M','e','L','P','W','b','o','H'},
+		{'j','V','A','c','z','w','T','x'},
+		{'t','r','K','q','G','=','Z','1'},
+		{'C','N','7','d','p','Y','4','Q'},
+		{'g','U','8','v','n','D','a','X'},
+		{'6','i',' ','O','0','3','s','9'},
+		{'E','u','F','5','S','2','h','R'},
         };
-/*15690*/
-
-
-/*0V4hPj*/
     while(encDriver != NULL)
     {
     	int loop;
-        /*for(loop=0;encDriver->surname[loop]!='\0';loop++)
-        {
-            int ax,ay,sx,sy;
-            for (ay=0;ay<13;ay++)
-                for (ax=0;ax<5;ax++)
-                    if(encDriver->surname[loop] == alphanum[ay][ax])
-                    {
-                        sx=ax;
-                        sy=ay;
-                        break;
-                    }
-            encDriver->surname[loop]=secret[sy][sx];
-        }*/
 
-	for(loop=0; encDriver->surname[loop]!='\0'; loop++)
-        {
+	for(loop=0; encDriver->surname[loop]!='\0'; loop++){
             int ax,ay,sx,sy;
             for (ay=0;ay<8;ay++)
                 for (ax=0;ax<8;ax++)
-			if(encDriver->surname[loop] == alphanum[ay][ax]){
-				if(loop >= 0 && loop < 2){
-					sx = ax + key[0];
-					while(sx >= 8){
-						sx -= 8;
+				if(encDriver->surname[loop] == alphanum[ay][ax]){
+					if(loop >= 0 && loop < 2){
+						sx = ax + key[0];
+						while(sx >= 8){
+							sx -= 8;
+						}
+								sy = ay + key[0];
+						while(sy >= 8){
+							sy -= 8;
+						}
+								break;
 					}
-		                	sy = ay + key[0];
-					while(sy >= 8){
-						sy -= 8;
+					if(loop >= 2 && loop < 4){
+						sx = ax + key[1];
+						while(sx >= 8){
+							sx -= 8;
+						}
+								sy = ay + key[1];
+						while(sy >= 8){
+							sy -= 8;
+						}
+								break;
 					}
-		                	break;
-				}
-				if(loop >= 2 && loop < 4){
-					sx = ax + key[1];
-					while(sx >= 8){
-						sx -= 8;
+					if(loop >= 4 && loop < 6){
+						sx = ax + key[2];
+						while(sx >= 8){
+							sx -= 8;
+						}
+								sy = ay + key[2];
+						while(sy >= 8){
+							sy -= 8;
+						}
+								break;
 					}
-		                	sy = ay + key[1];
-					while(sy >= 8){
-						sy -= 8;
+					if(loop >= 6 && loop < 8){
+						sx = ax + key[3];
+						while(sx >= 8){
+							sx -= 8;
+						}
+								sy = ay + key[3];
+						while(sy >= 8){
+							sy -= 8;
+						}
+								break;
 					}
-		                	break;
-				}
-				if(loop >= 4 && loop < 6){
-					sx = ax + key[2];
-					while(sx >= 8){
-						sx -= 8;
+					if(loop >= 8 && loop < 10){
+						sx = ax + key[4];
+						while(sx >= 8){
+							sx -= 8;
+						}
+								sy = ay + key[4];
+						while(sy >= 8){
+							sy -= 8;
+						}
+								break;
 					}
-		                	sy = ay + key[2];
-					while(sy >= 8){
-						sy -= 8;
-					}
-		                	break;
-				}
-				if(loop >= 6 && loop < 8){
-					sx = ax + key[3];
-					while(sx >= 8){
-						sx -= 8;
-					}
-		                	sy = ay + key[3];
-					while(sy >= 8){
-						sy -= 8;
-					}
-		                	break;
-				}
-				if(loop >= 8 && loop < 10){
-					sx = ax + key[4];
-					while(sx >= 8){
-						sx -= 8;
-					}
-		                	sy = ay + key[4];
-					while(sy >= 8){
-						sy -= 8;
-					}
-		                	break;
-				}
 		}
 		encDriver->surname[loop]=secret[sy][sx];
 	}
-                    
-
-        /*for(loop=0;encDriver->firstName[loop]!='\0';loop++)
-        {
+	
+	for(loop=0; encDriver->firstName[loop]!='\0'; loop++){
             int ax,ay,sx,sy;
-            for (ay=0;ay<13;ay++)
-                for (ax=0;ax<5;ax++)
-                    if(encDriver->firstName[loop]==alphanum[ay][ax])
-                    {
-                        sx=ax;
-                        sy=ay;
-                        break;
-                    }
-            encDriver->firstName[loop]=secret[sy][sx];
-        }
-
-        for(loop=0; encDriver->address[loop] != '\0'; loop++)
-        {
+            for (ay=0;ay<8;ay++)
+                for (ax=0;ax<8;ax++)
+				if(encDriver->firstName[loop] == alphanum[ay][ax]){
+					if(loop >= 0 && loop < 2){
+						sx = ax + key[0];
+						while(sx >= 8){
+							sx -= 8;
+						}
+								sy = ay + key[0];
+						while(sy >= 8){
+							sy -= 8;
+						}
+								break;
+					}
+					if(loop >= 2 && loop < 4){
+						sx = ax + key[1];
+						while(sx >= 8){
+							sx -= 8;
+						}
+								sy = ay + key[1];
+						while(sy >= 8){
+							sy -= 8;
+						}
+								break;
+					}
+					if(loop >= 4 && loop < 6){
+						sx = ax + key[2];
+						while(sx >= 8){
+							sx -= 8;
+						}
+								sy = ay + key[2];
+						while(sy >= 8){
+							sy -= 8;
+						}
+								break;
+					}
+					if(loop >= 6 && loop < 8){
+						sx = ax + key[3];
+						while(sx >= 8){
+							sx -= 8;
+						}
+								sy = ay + key[3];
+						while(sy >= 8){
+							sy -= 8;
+						}
+								break;
+					}
+					if(loop >= 8 && loop < 10){
+						sx = ax + key[4];
+						while(sx >= 8){
+							sx -= 8;
+						}
+								sy = ay + key[4];
+						while(sy >= 8){
+							sy -= 8;
+						}
+								break;
+					}
+		}
+		encDriver->firstName[loop]=secret[sy][sx];
+	}
+	
+	for(loop=0; encDriver->address[loop]!='\0'; loop++){
             int ax,ay,sx,sy;
-            for (ay = 0; ay < 13; ay++)
-                for (ax = 0; ax < 5; ax++)
-                    if(encDriver->address[loop]==alphanum[ay][ax])
-                    {
-                        sx=ax;
-                        sy=ay;
-                        break;
-                    }
-            encDriver->address[loop]=secret[sy][sx];
-        }*/
-
-        /*for(loop=0;linkedlistp->storeddata.address[loop]!='\0';loop++)
-        {
-            int ax,ay,sx,sy;
-            for (ay=0;ay<13;ay++)
-                for (ax=0;ax<5;ax++)
-                    if(linkedlistp->storeddata.address[loop]==alphanum[ay][ax])
-                    {
-                        sx=ax;
-                        sy=ay;
-                        break;
-                    }
-            linkedlistp->storeddata.address[loop]=secret[sy][sx];
-        }
-
-        for(loop=0;loop<3;loop++)
-        {
-            int ax,ay,sx,sy;
-            for (ay=0;ay<13;ay++)
-                for (ax=0;ax<5;ax++)
-                    if(linkedlistp->storeddata.blood[loop]==alphanum[ay][ax])
-                    {
-                        sx=ax;
-                        sy=ay;
-                        break;
-                    }
-            linkedlistp->storeddata.blood[loop]=secret[sy][sx];
-        }
+            for (ay=0;ay<8;ay++)
+                for (ax=0;ax<8;ax++)
+				if(encDriver->address[loop] == alphanum[ay][ax]){
+					if(loop >= 0 && loop < 4){
+						sx = ax + key[0];
+						while(sx >= 8){
+							sx -= 8;
+						}
+								sy = ay + key[0];
+						while(sy >= 8){
+							sy -= 8;
+						}
+								break;
+					}
+					if(loop >= 4 && loop < 8){
+						sx = ax + key[1];
+						while(sx >= 8){
+							sx -= 8;
+						}
+								sy = ay + key[1];
+						while(sy >= 8){
+							sy -= 8;
+						}
+								break;
+					}
+					if(loop >= 8 && loop < 12){
+						sx = ax + key[2];
+						while(sx >= 8){
+							sx -= 8;
+						}
+								sy = ay + key[2];
+						while(sy >= 8){
+							sy -= 8;
+						}
+								break;
+					}
+					if(loop >= 12 && loop < 16){
+						sx = ax + key[3];
+						while(sx >= 8){
+							sx -= 8;
+						}
+								sy = ay + key[3];
+						while(sy >= 8){
+							sy -= 8;
+						}
+								break;
+					}
+					if(loop >= 16 && loop < 20){
+						sx = ax + key[4];
+						while(sx >= 8){
+							sx -= 8;
+						}
+								sy = ay + key[4];
+						while(sy >= 8){
+							sy -= 8;
+						}
+								break;
+					}
+		}
+		encDriver->address[loop]=secret[sy][sx];
+	}
+		/*
 
         linkedlistp->storeddata.day+=(key[0]+key[1]+key[2]-key[3]);
         linkedlistp->storeddata.month+=(key[3]+key[2]+key[1]-key[0]);
@@ -721,9 +950,8 @@ void encrypt(driver_t* start)
     }
 }
 
-
 /***************************************************
-BUilding the huff tree
+Building the huff tree
 ****************************************************/
 
 int englishLetterFrequencies [36] = {77,11,23,39,120,18,16,56,65,1,4,36,20,62,69,15,1,55,58,86,24,6,20,1,16,1,12,29,17,12,9,7,6,4,3,3};
@@ -949,8 +1177,42 @@ inputs:
 -
 outputs:
 -
-*****************************************************************************/void clr_stdin(void)
-{
+*****************************************************************************/
+void exitConfirm(){
+	printf("Are you sure you want to exit? ");
+	char choice;
+	while(choice != '0'){
+		scanf(" %c", &choice);
+		clr_stdin();
+		switch(choice){	
+		case 'Y':
+		case 'y':
+			/*system("clear");*/
+			printf("Thank you for using our program! :) \n");
+			exit(0);
+			break;
+		case 'N':
+		case 'n':
+			/*system("clear");*/
+		printf("Returning you to the Main Menu!");
+		/*mainMenu();*/
+		break;
+
+default:
+     printf("%s is an invalid input", &choice);
+}
+}
+}
+
+/*****************************************************************************
+clr_stdin
+This function clears stdin buffer, in most cases the '\n' that is left out by
+the scanf function.
+inputs:
+-
+outputs:
+-
+*****************************************************************************/void clr_stdin(void){
     int c;
     do {
         c = getchar();
